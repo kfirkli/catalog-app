@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}{% endblock %} - Catalog App</title>
+</head>
+<body>
+<div>
+  <h1>Catalog App</h1>
+
+  <a href="{{ url_for('show_catalog') }}">Home</a>
+
+  {% if category or item %}
+    <span> > </span>
+    <a href="{{ url_for('show_category', category_name=category.name if category else item.category.name) }}">{{ category.name if category else item.category.name }}</a>
+  {% endif %}
+
+
+  {% if item %}
+    <span> > </span>
+    <a href="{{ url_for('show_item', item_title=item.title) }}">{{ item.title }}</a>
+  {% endif %}
+  <br>
+</div>
+<section>
+  <header>
+    {% block content %}{% endblock %}
+  </header>
+</section>
+</body>
+</html>
+
