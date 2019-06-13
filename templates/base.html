@@ -6,6 +6,16 @@
 </head>
 <body>
 <div>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
   <h1>Catalog App</h1>
 
   <a href="{{ url_for('show_catalog') }}">Home</a>

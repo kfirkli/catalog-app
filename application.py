@@ -1,4 +1,5 @@
-from flask import Flask, request, render_template, url_for, redirect, jsonify
+from flask import Flask, request, render_template, url_for, redirect, jsonify, \
+    flash
 
 import repository
 from database_structure import Item
@@ -62,6 +63,7 @@ def new_item():
                     category_id=request.form['category_id'])
 
         repository.create_item(item)
+        flash('\'%s\' successfully added' % item.title)
 
         return redirect(url_for('show_catalog'))
 
@@ -83,6 +85,8 @@ def edit_item(item_title):
         item.category_id = request.form['category_id']
 
         repository.session.commit()
+        flash('\'%s\' successfully edited' % item_title)
+
         return redirect(url_for('show_catalog'))
 
     # GET
@@ -99,6 +103,7 @@ def delete_item(item_title):
 
     if request.method == 'POST':
         repository.delete_item(item)
+        flash('\'%s\' successfully deleted' % item_title)
 
         return redirect(url_for('show_catalog'))
 
