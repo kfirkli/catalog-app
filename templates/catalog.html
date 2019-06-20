@@ -22,8 +22,7 @@
         <a href="{{ url_for('show_category', category_name=item.category.name) }}"><i>({{ item.category.name }})</i></a>
         <br>
 
-        <a href="{{ url_for('edit_item', item_title=item.title_url()) }}">Edit</a>
-        <a href="{{ url_for('delete_item', item_title=item.title_url()) }}">Delete</a>
+        {% include 'edit_delete_links.html' %}
         <br><br>
       {% else %}
         <p>There is no Items in the Database</p>

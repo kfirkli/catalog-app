@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Not authorized{% endblock %}
+
+{% block content %}
+  <h2>You are not authorized</h2>
+  {% if message %}
+    <p>{{ message }}</p>
+  {% endif %}
+{% endblock %}

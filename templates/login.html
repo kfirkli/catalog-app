@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% set no_login_links=True %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+  <div>
+    <h2>Login</h2>
+    <form id="login_form" action="" onsubmit="setFormAction()" method="post">
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" placeholder="">
+      <br><br>
+
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password">
+      <br><br>
+
+      <input type="submit" value="Login">
+    </form>
+  </div>
+
+  <script>
+    function setFormAction() {
+      if (location.search && location.search.includes('next=')) {
+        var nextParam = location.search.split('next=')[1].split('&')[0];
+      }
+      var url = "{{ url_for('oauth', state=state) }}";
+      if (nextParam) {
+        url += "&next=" + nextParam;
+      }
+      document.getElementById('login_form').action = url;
+    }
+  </script>
+{% endblock %}

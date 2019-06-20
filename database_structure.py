@@ -1,11 +1,29 @@
 import re
 
+from flask_login import UserMixin
+from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy import Column, ForeignKey, Integer, String, create_engine, \
     DateTime, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
+
+
+class User(Base, UserMixin):
+    __tablename__ = 'user'
+
+    id = Column(Integer, primary_key=True)
+    email = Column(String(320), unique=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    password = Column(String(64))
+
+    def hash_password(self, password):
+        self.password = pwd_context.encrypt(password)
+
+    def verify_password(self, password):
+        return pwd_context.verify(password, self.password)
 
 
 class Category(Base):
@@ -35,6 +53,8 @@ class Item(Base):
     description = Column(String(768))
     category_id = Column(Integer, ForeignKey('category.id'))
     category = relationship(Category, back_populates="items")
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
     added_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def title_url(self):

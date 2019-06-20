@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from database_structure import Base, Item, Category, decode_url_spaces
+from database_structure import Base, Item, Category, User, decode_url_spaces
 
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
@@ -46,3 +46,30 @@ def get_category_by_name(category_name):
 def get_category_by_name_url(category_name_url):
     category_name = decode_url_spaces(category_name_url)
     return get_category_by_name(category_name)
+
+
+# Users --------------------------------------------------------------------- #
+def get_user_by_id(id):
+    return session.query(User) \
+        .filter_by(id=id) \
+        .first()
+
+
+def get_user_by_email(email):
+    return session.query(User) \
+        .filter_by(email=email.lower()) \
+        .first()
+
+
+def create_user(email, first_name, last_name, password):
+    if get_user_by_email(email):
+        # User with this email already exists
+        return None
+
+    user = User(email=email.lower(), first_name=first_name,
+                last_name=last_name)
+    user.hash_password(password)
+
+    session.add(user)
+    session.commit()
+    return user
