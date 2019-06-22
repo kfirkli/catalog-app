@@ -1,4 +1,6 @@
 {% if current_user.id == item.user_id %}
-  <a href="{{ url_for('edit_item', item_title=item.title_url()) }}">Edit</a>
-  <a href="{{ url_for('delete_item', item_title=item.title_url()) }}">Delete</a>
+  <span class="edit-delete no-margin">
+    <a href="{{ url_for('edit_item', item_title=item.title_url()) }}">Edit</a>
+    <a href="{{ url_for('delete_item', item_title=item.title_url()) }}">Delete</a>
+  </span>
 {% endif %}

@@ -2,8 +2,8 @@
 {% block title %}Categories{% endblock %}
 
 {% block content %}
-  <div>
-    <div>
+  <div class="pane category-pane">
+    <div class="categories">
       <h2>Categories</h2>
       {% for category in categories %}
         <a href="{{ url_for('show_category', category_name=category.name_url()) }}">{{ category.name }}</a>
@@ -12,17 +12,17 @@
         <p>There is no Categories in the Database</p>
       {% endfor %}
     </div>
-    <div>
-      <h2>{{ category.name }} ({{ category.items|length }} Items)</h2>
-      <a href="{{ url_for('new_item') }}">Add new Item</a>
-      <br><br>
+    <div class="items">
+      <div class="h-inline">
+        <h2>{{ category.name }} ({{ category.items|length }} Items)</h2>
+        <a href="{{ url_for('new_item') }}">Add new Item</a>
+      </div>
 
       {% for item in category.items %}
-        <a href="{{ url_for('show_item', item_title=item.title_url()) }}">{{ item.title }}</a>
-        <br>
-
-        {% include 'edit_delete_links.html' %}
-        <br><br>
+        <div>
+          <a href="{{ url_for('show_item', item_title=item.title_url()) }}">{{ item.title }}</a>
+          {% include 'edit_delete_links.html' %}
+        </div>
       {% else %}
         <p>There is no Items in the Database</p>
       {% endfor %}

@@ -2,7 +2,7 @@
 {% block title %}Categories{% endblock %}
 
 {% block content %}
-  <div>
+  <div class="pane">
     <h2>Edit Item</h2>
     {% if item %}
       <form action="{{ url_for('edit_item', item_title=item.title_url()) }}" method="post">
@@ -20,7 +20,8 @@
         <br><br>
 
         <label for="description">Description</label>
-        <textarea name="description" id="description" rows="5" cols="50" placeholder="{{ item.description }}">{{ item.description }}</textarea>
+        <textarea name="description" id="description" rows="5" cols="50"
+                  placeholder="{{ item.description }}">{{ item.description }}</textarea>
         <br><br>
 
         <input type="submit" value="Update">

@@ -21,7 +21,7 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-  <div>
+  <div class="pane login-pane">
     <h2>Login</h2>
     <form id="login_form" action="" onsubmit="setFormAction()" method="post">
       <label for="email">Email</label>
@@ -35,9 +35,9 @@
       <input type="submit" value="Login">
     </form>
 
-    <br><b>or</b><br>
+    <div class="line-separator-with-text"><span>or</span></div>
 
-    <div id="signinButton" class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+    <span id="signinButton" class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></span>
   </div>
 
   <script>

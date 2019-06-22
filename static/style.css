@@ -1,0 +1,155 @@
+body {
+  font-family: Tahoma, sans-serif;
+  background-color: #9c9c9c;
+  font-size: 1.25em;
+  margin: 0;
+}
+
+h1, h2, h4 {
+  color: #00006a;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+a {
+  text-decoration: none;
+  color: #ff4500;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+.app-title {
+  margin: 0;
+}
+
+.nav-menu {
+  background-color: #00006a;
+  padding: 15px;
+}
+
+.nav-menu h1 {
+  color: #ffffff;
+}
+
+.login-section {
+  float: right;
+}
+
+.login-section span {
+  color: #ffffff;
+}
+
+.pane {
+  position: relative;
+  border-radius: 5px;
+  padding: 25px;
+  margin: 25px;
+  border: 1px #656565 solid;
+  background-color: #ffffff;
+}
+
+.category-pane {
+  display: grid;
+  grid-template-columns: 1fr 5fr;
+}
+
+.categories {
+  padding-right: 25px;
+}
+
+.items {
+  border-left: 1px #656565 solid;
+  padding-left: 25px;
+}
+
+.items i {
+  color: #808080;
+}
+
+.edit-delete {
+  margin-left: 50px;
+}
+
+.edit-delete a {
+  color: #6c7c17;
+}
+
+.no-margin {
+  margin: 0;
+}
+
+.h-inline h1,
+.h-inline h2,
+.h-inline h3 {
+  display: inline-block;
+}
+
+input {
+  vertical-align: top;
+}
+
+label {
+  display: inline-block;
+  width: 140px;
+  color: #ff4500;
+  font-size: .75em;
+  vertical-align: top;
+}
+
+.flash {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #ff4500;
+  color: #ffffff;
+  border-bottom-left-radius: 25px;
+  border-bottom-right-radius: 25px;
+
+  -webkit-animation: fadeOut 1s;
+  animation: slideOut 1s;
+  animation-fill-mode: forwards;
+  animation-delay: 3s;
+}
+
+@-webkit-keyframes slideOut {
+  0% {
+    top: 0;
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes slideOut {
+  0% {
+    top: 0;
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+.line-separator-with-text {
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid #000000;
+  line-height: 0.1em;
+  margin: 10px 0 20px;
+}
+
+.line-separator-with-text span {
+  color: #000000;
+  background: #ffffff;
+  padding: 0 10px;
+}
+
+.login-pane {
+  width: 35%;
+  margin-left: auto;
+  margin-right: auto;
+}

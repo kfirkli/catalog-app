@@ -2,11 +2,10 @@
 {% block title %}Categories{% endblock %}
 
 {% block content %}
-  <div>
+  <div class="pane">
     {% if item %}
       <h2>{{ item.title }}</h2>
       <p>{{ item.description }}</p>
-
       {% include 'edit_delete_links.html' %}
     {% else %}
       <p>There is no such Item</p>

@@ -2,38 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
   <title>{% block title %}{% endblock %} - Catalog App</title>
   {% block head %}{% endblock %}
 </head>
 <body>
-<div>
-  {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <ul>
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
-
-  <h1>Catalog App</h1>
-
-  {% if not no_login_links %}
-    <div>
-      {% if current_user.is_authenticated %}
-        <span>
-      Hello,
-        {{ current_user.first_name + ' ' + current_user.last_name }}
-        <a id="logout-link" href="{{ url_for('logout') }}">Logout</a>
-      </span>
-      {% else %}
-        <a id="login-link" href="{{ url_for('login') }}">Login</a>
-        or
-        <a href="{{ url_for('register') }}">Register</a>
+<div class="nav-menu">
+  <div class="flash">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
       {% endif %}
-    </div>
-  {% endif %}
+    {% endwith %}
+  </div>
+
+  <h1 class="app-title"><b>Catalog App</b></h1>
 
   <a href="{{ url_for('show_catalog') }}">Home</a>
 
@@ -42,12 +29,28 @@
     <a href="{{ url_for('show_category', category_name=category.name_url() if category else item.category.name) }}">{{ category.name if category else item.category.name }}</a>
   {% endif %}
 
-
   {% if item %}
     <span> > </span>
     <a href="{{ url_for('show_item', item_title=item.title_url()) }}">{{ item.title }}</a>
   {% endif %}
-  <br>
+
+  <div class="login-section">
+    {% if not no_login_links %}
+      <div>
+        {% if current_user.is_authenticated %}
+          <span>
+      Hello,
+        {{ current_user.first_name + ' ' + current_user.last_name }}
+        <a id="logout-link" href="{{ url_for('logout') }}">Logout</a>
+      </span>
+        {% else %}
+          <a id="login-link" href="{{ url_for('login') }}">Login</a>
+          <span>or</span>
+          <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
 </div>
 <section>
   <header>
