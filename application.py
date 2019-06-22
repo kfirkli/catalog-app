@@ -1,14 +1,21 @@
+import json
 import urllib
 import uuid
 
+import httplib2
+import requests
 from flask import Flask, request, render_template, url_for, redirect, \
-    jsonify, flash
+    jsonify, flash, make_response
 from flask import session as login_session
 from flask_login import login_user, logout_user, current_user, LoginManager, \
     login_required
+from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 
 import repository
 from database_structure import Item
+
+GOOGLE_CLIENT_ID = json.loads(
+    open('client_secret.json', 'r').read())['web']['client_id']
 
 app = Flask(__name__)
 
@@ -186,13 +193,24 @@ def login():
     state = uuid.uuid4().hex
     login_session['state'] = state
 
-    return render_template('login.html', state=state)
+    return render_template('login.html', state=state,
+                           GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID)
 
 
 @app.route('/logout')
 def logout():
     logout_user()
-    login_session.pop('token', None)
+
+    # If using google oauth, disconnect it
+    if login_session.get('oauth_provider') == 'google':
+        gdisconnect()
+
+    # Clear login session
+    login_session.pop('state', None)
+    login_session.pop('access_token', None)
+    login_session.pop('gplus_id', None)
+    login_session.pop('oauth_provider', None)
+
     return redirect(url_for('show_catalog'))
 
 
@@ -222,6 +240,100 @@ def oauth():
     if next_param:
         next_param = urllib.unquote_plus(next_param)
     return redirect(next_param or url_for('show_catalog'))
+
+
+def make_json_response(message, status_code=200):
+    response = make_response(json.dumps(message), status_code)
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
+
+@app.route('/gconnect', methods=['POST'])
+def gconnect():
+    # Validate state token
+    if request.args.get('state') != login_session['state']:
+        return make_json_response('Invalid state token.', 401)
+
+    # Get authorization code
+    authCode = request.data
+
+    # Try to exchange authorization code for refresh and access tokens
+    try:
+        oauth_flow = flow_from_clientsecrets('client_secret.json', scope='')
+        oauth_flow.redirect_uri = 'postmessage'
+        credentials = oauth_flow.step2_exchange(authCode)
+    except FlowExchangeError:
+        return make_json_response('Failed to exchange the authorization code.',
+                                  401)
+
+    # Validate the access token.
+    url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
+           % credentials.access_token)
+    http = httplib2.Http()
+    result = json.loads(http.request(url, 'GET')[1])
+
+    # If there was an error in the access token info, abort.
+    if result.get('error') is not None:
+        return make_json_response(result.get('error'), 500)
+
+    # Verify that the access token is used for the intended user.
+    gplus_id = credentials.id_token['sub']
+    if result['user_id'] != gplus_id:
+        return make_json_response(
+            "Token's user ID doesn't match given user ID.", 401)
+
+    # Verify that the access token is valid for this app.
+    if result['issued_to'] != GOOGLE_CLIENT_ID:
+        return make_json_response("Token's client ID does not match app's.",
+                                  401)
+
+    stored_access_token = login_session.get('access_token')
+    stored_gplus_id = login_session.get('gplus_id')
+    if stored_access_token is not None and gplus_id == stored_gplus_id:
+        return make_json_response('Current user is already connected.')
+
+    # Store the access token in the session for later use.
+    login_session['access_token'] = credentials.access_token
+    login_session['gplus_id'] = gplus_id
+    login_session['oauth_provider'] = 'google'
+
+    # Get user info
+    userinfo_url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+    params = {'access_token': credentials.access_token, 'alt': 'json'}
+    user_info = requests.get(userinfo_url, params=params).json()
+
+    # Check if user exists, if not create new one
+    user = repository.get_user_by_email(user_info['email'])
+    if not user:
+        user = repository.create_user(user_info['email'],
+                                      user_info['given_name'],
+                                      user_info['family_name'], None)
+
+    # Login the user
+    login_user(user)
+    flash('You are successfully logged in')
+
+    return make_json_response('Successfully logged in.')
+
+
+@app.route('/gdisconnect')
+def gdisconnect():
+    # Check if there is singed in user
+    access_token = login_session.get('access_token')
+    if access_token is None:
+        return make_json_response('Current user not connected.', 401)
+
+    # Make a call to revoke access token
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    http = httplib2.Http()
+    result = http.request(url, 'GET')[0]
+
+    # Return success or failed
+    if result['status'] == '200':
+        return make_json_response('Successfully logged out.')
+    else:
+        return make_json_response('Failed to revoke token for given user.',
+                                  400)
 
 
 # --------------------------------------------------------------------------- #

@@ -1,6 +1,23 @@
 {% extends 'base.html' %}
 {% set no_login_links=True %}
 
+{% block head %}
+  <meta name="google-signin-scope" content="profile email">
+  <meta name="google-signin-client_id" content="{{ GOOGLE_CLIENT_ID }}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
+
+  <script>
+    function start() {
+      gapi.load('auth2', function () {
+        auth2 = gapi.auth2.init({
+          client_id: '{{ GOOGLE_CLIENT_ID }}'
+        });
+      });
+    }
+  </script>
+{% endblock %}
+
 {% block title %}Login{% endblock %}
 
 {% block content %}
@@ -17,18 +34,52 @@
 
       <input type="submit" value="Login">
     </form>
+
+    <br><b>or</b><br>
+
+    <div id="signinButton" class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
   </div>
 
   <script>
-    function setFormAction() {
+    function getNextParam() {
       if (location.search && location.search.includes('next=')) {
-        var nextParam = location.search.split('next=')[1].split('&')[0];
+        return location.search.split('next=')[1].split('&')[0];
       }
+      return null;
+    }
+
+    function setFormAction() {
+      var nextParam = getNextParam();
       var url = "{{ url_for('oauth', state=state) }}";
       if (nextParam) {
         url += "&next=" + nextParam;
       }
       document.getElementById('login_form').action = url;
     }
+
+    $('#signinButton').click(function () {
+      function signInCallback(authResult) {
+        if (authResult['code']) {
+          $.ajax({
+            type: 'POST',
+            url: '/gconnect?state={{state}}',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            contentType: 'application/octet-stream; charset=utf-8',
+            success: function () {
+              window.location.href = decodeURIComponent(
+                getNextParam() || "{{ url_for('show_catalog') }}");
+            },
+            processData: false,
+            data: authResult['code']
+          });
+        } else {
+          alert('Failed to login with this authentication, please try again')
+        }
+      }
+
+      auth2.grantOfflineAccess().then(signInCallback);
+    });
   </script>
 {% endblock %}

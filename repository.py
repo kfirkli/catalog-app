@@ -68,7 +68,9 @@ def create_user(email, first_name, last_name, password):
 
     user = User(email=email.lower(), first_name=first_name,
                 last_name=last_name)
-    user.hash_password(password)
+
+    if password:
+        user.hash_password(password)
 
     session.add(user)
     session.commit()
