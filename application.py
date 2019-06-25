@@ -33,7 +33,7 @@ def catalog_json():
 # Categories ---------------------------------------------------------------- #
 @app.route('/catalog/<category_name>/items')
 def show_category(category_name):
-    category = repository.get_category_by_name(category_name)
+    category = repository.get_category_by_name_url(category_name)
 
     categories = repository.get_categories()
 
@@ -43,14 +43,14 @@ def show_category(category_name):
 
 @app.route('/catalog/<category_name>/items.json')
 def category_json(category_name):
-    category = repository.get_category_by_name(category_name)
+    category = repository.get_category_by_name_url(category_name)
     return jsonify(category=category.serialize)
 
 
 # Items --------------------------------------------------------------------- #
 @app.route('/catalog/<item_title>')
 def show_item(item_title):
-    item = repository.get_item_by_title(item_title)
+    item = repository.get_item_by_title_url(item_title)
     return render_template('item/item.html', item=item)
 
 
@@ -75,7 +75,7 @@ def new_item():
 
 @app.route('/catalog/<item_title>/edit', methods=['GET', 'POST'])
 def edit_item(item_title):
-    item = repository.get_item_by_title(item_title)
+    item = repository.get_item_by_title_url(item_title)
 
     if request.method == 'POST':
         item.title = request.form['title']
@@ -95,7 +95,7 @@ def edit_item(item_title):
 
 @app.route('/catalog/<item_title>/delete', methods=['GET', 'POST'])
 def delete_item(item_title):
-    item = repository.get_item_by_title(item_title)
+    item = repository.get_item_by_title_url(item_title)
 
     if request.method == 'POST':
         repository.delete_item(item)
@@ -108,7 +108,7 @@ def delete_item(item_title):
 
 @app.route('/catalog/<item_title>.json')
 def item_json(item_title):
-    item = repository.get_item_by_title(item_title)
+    item = repository.get_item_by_title_url(item_title)
     if item:
         return jsonify(item=item.serialize)
 

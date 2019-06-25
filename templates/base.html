@@ -12,13 +12,13 @@
 
   {% if category or item %}
     <span> > </span>
-    <a href="{{ url_for('show_category', category_name=category.name if category else item.category.name) }}">{{ category.name if category else item.category.name }}</a>
+    <a href="{{ url_for('show_category', category_name=category.name_url() if category else item.category.name) }}">{{ category.name if category else item.category.name }}</a>
   {% endif %}
 
 
   {% if item %}
     <span> > </span>
-    <a href="{{ url_for('show_item', item_title=item.title) }}">{{ item.title }}</a>
+    <a href="{{ url_for('show_item', item_title=item.title_url()) }}">{{ item.title }}</a>
   {% endif %}
   <br>
 </div>
