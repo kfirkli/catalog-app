@@ -18,6 +18,7 @@ class User(Base, UserMixin):
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     password = Column(String(64))
+    items = relationship('Item', cascade="all, delete-orphan")
 
     def is_valid(self):
         return not (
@@ -38,7 +39,8 @@ class Category(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True, nullable=False)
-    items = relationship('Item', back_populates='category')
+    items = relationship('Item', back_populates='category',
+                         cascade="all, delete-orphan")
 
     def name_url(self):
         return encode_url_spaces(self.name)
