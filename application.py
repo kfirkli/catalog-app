@@ -28,6 +28,11 @@ login_manager.login_view = 'login'
 @app.route('/')
 @app.route('/catalog')
 def show_catalog():
+    """Endpoint that serve the catalog page.
+
+    Returns:
+        Catalog page.
+    """
     categories = repository.get_categories()
 
     items = repository.session.query(Item) \
@@ -40,6 +45,11 @@ def show_catalog():
 
 @app.route('/catalog.json')
 def catalog_json():
+    """Endpoint returning all items in the catalog as JSON.
+
+    Returns:
+        The catalog as JSON.
+    """
     categories = repository.get_categories()
     if categories:
         return jsonify(
@@ -51,6 +61,14 @@ def catalog_json():
 # Categories ---------------------------------------------------------------- #
 @app.route('/catalog/<category_name>/items')
 def show_category(category_name):
+    """Endpoint that serve the category page.
+
+    Args:
+        category_name: Category name.
+
+    Returns:
+        Catalog page.
+    """
     category = repository.get_category_by_name_url(category_name)
 
     categories = repository.get_categories()
@@ -61,6 +79,14 @@ def show_category(category_name):
 
 @app.route('/catalog/<category_name>/items.json')
 def category_json(category_name):
+    """Endpoint returning all items in the the given category name as JSON.
+
+    Args:
+        category_name: Category name.
+
+    Returns:
+        The category as JSON.
+    """
     category = repository.get_category_by_name_url(category_name)
     return jsonify(category=category.serialize)
 
@@ -68,6 +94,14 @@ def category_json(category_name):
 # Items --------------------------------------------------------------------- #
 @app.route('/catalog/<item_title>')
 def show_item(item_title):
+    """Endpoint that serve the item page.
+
+    Args:
+        item_title: Item title.
+
+    Returns:
+        Item page.
+    """
     item = repository.get_item_by_title_url(item_title)
     return render_template('item/item.html', item=item)
 
@@ -75,6 +109,15 @@ def show_item(item_title):
 @app.route('/catalog/items/new', methods=['GET', 'POST'])
 @login_required
 def new_item():
+    """Endpoint that both for GET and POST methods to add new item.
+
+    Methods:
+        GET: Serve the new item page.
+        POST: Add new item to the database.
+
+    Returns:
+        New item page or redirect to catalog page.
+    """
     if request.method == 'POST':
         item = Item(title=request.form['title'],
                     description=request.form['description'],
@@ -101,6 +144,18 @@ def new_item():
 @app.route('/catalog/<item_title>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_item(item_title):
+    """Endpoint that both for GET and POST methods to edit item.
+
+    Methods:
+        GET: Serve the edit item page.
+        POST: Update item in the database.
+
+    Args:
+        item_title: Item title.
+
+    Returns:
+        New item page or redirect to catalog page.
+    """
     item = repository.get_item_by_title_url(item_title)
     if not item:
         # When there is no Item show the user the edit page with the message
@@ -138,6 +193,18 @@ def edit_item(item_title):
 @app.route('/catalog/<item_title>/delete', methods=['GET', 'POST'])
 @login_required
 def delete_item(item_title):
+    """Endpoint that both for GET and POST methods to delete item.
+
+    Methods:
+        GET: Serve the delete item page.
+        POST: Delete item from the database.
+
+    Args:
+        item_title: Item title.
+
+    Returns:
+        Delete item page or redirect to the catalog page.
+    """
     item = repository.get_item_by_title_url(item_title)
 
     if not item:
@@ -163,6 +230,14 @@ def delete_item(item_title):
 
 @app.route('/catalog/<item_title>.json')
 def item_json(item_title):
+    """Endpoint returning item with the given item title as JSON.
+
+    Args:
+        item_title: Item title.
+
+    Returns:
+        The item as JSON.
+    """
     item = repository.get_item_by_title_url(item_title)
     if item:
         return jsonify(item=item.serialize)
@@ -173,11 +248,29 @@ def item_json(item_title):
 # Authentication ------------------------------------------------------------ #
 @login_manager.user_loader
 def load_user(user_id):
+    """Define the method of login_manager to load the logged in user to the
+    session as current user.
+
+    Args:
+        user_id: User id
+
+    Returns:
+        User object
+    """
     return repository.get_user_by_id(user_id)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """Endpoint that both for GET and POST methods to register as new user.
+
+    Methods:
+        GET: Serve the register page.
+        POST: Add new user to the database.
+
+    Returns:
+        Register page or redirect to catalog page.
+    """
     if request.method == 'POST':
         data = request.form
 
@@ -204,6 +297,11 @@ def register():
 
 @app.route('/login')
 def login():
+    """Endpoint that serve the login page.
+
+    Returns:
+        Login page.
+    """
     # Create state token
     state = uuid.uuid4().hex
     login_session['state'] = state
@@ -214,6 +312,11 @@ def login():
 
 @app.route('/logout')
 def logout():
+    """Endpoint for logout current user from the session.
+
+    Returns:
+        Redirect to the catalog page.
+    """
     logout_user()
 
     # If using google oauth, disconnect it
@@ -231,6 +334,13 @@ def logout():
 
 @app.route('/oauth', methods=['POST'])
 def oauth():
+    """Endpoint for authorization a new login session as POST method.
+
+    Checks for token validate and password.
+
+    Returns:
+        Redirect to the last page or to catalog page.
+    """
     # Validate state token
     if request.args['state'] != login_session['state']:
         flash('Invalid state token')
@@ -258,6 +368,16 @@ def oauth():
 
 
 def make_json_response(message, status_code=200):
+    """Makes response object as JSON with the given message
+    and with Status code Success 200.
+
+    Args:
+        message: The message of the response object.
+        status_code: The status code of the response object. Defaults to 200
+
+    Returns:
+        Redirect to the catalog page.
+    """
     response = make_response(json.dumps(message), status_code)
     response.headers['Content-Type'] = 'application/json'
     return response
@@ -265,6 +385,13 @@ def make_json_response(message, status_code=200):
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """Endpoint for authorization a new login session with Google OAuth 2.0
+    as POST method.
+    Checks for token validate and authorization of Google.
+
+    Returns:
+        Redirect to the last page or to catalog page.
+    """
     # Validate state token
     if request.args.get('state') != login_session['state']:
         return make_json_response('Invalid state token.', 401)
@@ -336,6 +463,12 @@ def gconnect():
 
 @app.route('/gdisconnect')
 def gdisconnect():
+    """Endpoint for logout current user from the session and revoke the access
+    token of Google OAuth 2.0.
+
+    Returns:
+        Success or failed with message as JSON
+    """
     # Check if there is singed in user
     access_token = login_session.get('access_token')
     if access_token is None:

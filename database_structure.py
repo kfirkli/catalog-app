@@ -11,6 +11,7 @@ Base = declarative_base()
 
 
 class User(Base, UserMixin):
+    """A class that represent a user in the database."""
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -21,6 +22,11 @@ class User(Base, UserMixin):
     items = relationship('Item', cascade="all, delete-orphan")
 
     def is_valid(self):
+        """Validate the user's attributes.
+
+        Returning:
+            True or False if the user is valid.
+        """
         return not (
             not self.email
             or not self.first_name
@@ -28,13 +34,27 @@ class User(Base, UserMixin):
         )
 
     def hash_password(self, password):
+        """Hash the given password and set it to the user.
+
+        Args:
+            password: Password.
+        """
         self.password = pwd_context.encrypt(password)
 
     def verify_password(self, password):
+        """Check whether the password is valid or not.
+
+        Args:
+            password: Password.
+
+        Returning:
+            True or False if the password is valid.
+        """
         return pwd_context.verify(password, self.password)
 
 
 class Category(Base):
+    """A class that represent a category in the database."""
     __tablename__ = 'category'
 
     id = Column(Integer, primary_key=True)
@@ -43,13 +63,28 @@ class Category(Base):
                          cascade="all, delete-orphan")
 
     def name_url(self):
+        """Encode the category name to url title.
+
+        Returning:
+            The category name encoded to url title.
+        """
         return encode_url_spaces(self.name)
 
     def is_valid(self):
+        """Validate the category's attributes.
+
+        Returning:
+            True or False if the category is valid.
+        """
         return not (not self.name)
 
     @property
     def serialize(self):
+        """Serialize the category to JSON.
+
+        Returning:
+            Category as JSON.
+        """
         return {
             'id': self.id,
             'name': self.name,
@@ -58,6 +93,7 @@ class Category(Base):
 
 
 class Item(Base):
+    """A class that represent an item in the database."""
     __tablename__ = 'item'
 
     id = Column(Integer, primary_key=True)
@@ -70,9 +106,19 @@ class Item(Base):
     added_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def title_url(self):
+        """Encode the item title to url title.
+
+        Returning:
+            The item title encoded to url title.
+        """
         return encode_url_spaces(self.title)
 
     def is_valid(self):
+        """Validate the item's attributes.
+
+        Returning:
+            True or False if the item is valid.
+        """
         return not (
             not self.title
             or not self.description
@@ -82,6 +128,11 @@ class Item(Base):
 
     @property
     def serialize(self):
+        """Serialize the item to JSON.
+
+        Returning:
+            Item as JSON.
+        """
         return {
             'id': self.id,
             'title': self.title,
@@ -101,10 +152,15 @@ nondash_dash_nondash_matcher = re.compile('([^-])-([^-])')
 
 
 def encode_url_spaces(title):
-    """
-    Add one more dash to existing sequence of dashes
-    (Save on the dashes during the decoding),
-    and replace spaces with one dash.
+    """Replaces spaces with one dash.
+    Adds one more dash to existing sequence of dashes (Save on the dashes
+    during the decoding).
+
+    Examples:
+        'Canon EOS 5D Mark IV' -> 'Canon-EOS-5D-Mark-IV'
+
+    Args:
+        title: title of an item or any other string.
     """
     return dash_nondash_matcher.sub(r'-\g<0>', title) \
         .replace(' ', '-')
@@ -113,6 +169,12 @@ def encode_url_spaces(title):
 def decode_url_spaces(url_title):
     """
     Replace single dashes with space and remove sequence of dashes.
+
+    Examples:
+        'Canon-EOS-5D-Mark-IV' -> 'Canon EOS 5D Mark IV'
+
+    Args:
+        url_title: title as url of an item or any other string.
     """
     title = nondash_dash_nondash_matcher.sub(r'\g<1> \g<2>', url_title)
     return dash_nondash_matcher.sub(r'\g<1>', title)
