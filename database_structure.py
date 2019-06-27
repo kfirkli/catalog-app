@@ -19,6 +19,13 @@ class User(Base, UserMixin):
     last_name = Column(String(50), nullable=False)
     password = Column(String(64))
 
+    def is_valid(self):
+        return not (
+            not self.email
+            or not self.first_name
+            or not self.last_name
+        )
+
     def hash_password(self, password):
         self.password = pwd_context.encrypt(password)
 
@@ -30,11 +37,14 @@ class Category(Base):
     __tablename__ = 'category'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True)
+    name = Column(String(50), unique=True, nullable=False)
     items = relationship('Item', back_populates='category')
 
     def name_url(self):
         return encode_url_spaces(self.name)
+
+    def is_valid(self):
+        return not (not self.name)
 
     @property
     def serialize(self):
@@ -49,16 +59,24 @@ class Item(Base):
     __tablename__ = 'item'
 
     id = Column(Integer, primary_key=True)
-    title = Column(String(255), unique=True)
-    description = Column(String(768))
-    category_id = Column(Integer, ForeignKey('category.id'))
+    title = Column(String(255), unique=True, nullable=False)
+    description = Column(String(768), nullable=False)
+    category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
     category = relationship(Category, back_populates="items")
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     user = relationship(User)
     added_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def title_url(self):
         return encode_url_spaces(self.title)
+
+    def is_valid(self):
+        return not (
+            not self.title
+            or not self.description
+            or (not self.category_id and not self.category)
+            or (not self.user_id and not self.user)
+        )
 
     @property
     def serialize(self):

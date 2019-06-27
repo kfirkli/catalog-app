@@ -62,15 +62,14 @@ def get_user_by_email(email):
 
 
 def create_user(email, first_name, last_name, password):
-    if get_user_by_email(email):
-        # User with this email already exists
-        return None
-
     user = User(email=email.lower(), first_name=first_name,
                 last_name=last_name)
 
     if password:
         user.hash_password(password)
+
+    if not user.is_valid():
+        return
 
     session.add(user)
     session.commit()

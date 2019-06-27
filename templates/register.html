@@ -8,21 +8,21 @@
     <h2>Register</h2>
     <form action="{{ url_for('register') }}" method="post">
       <label for="email">Email</label>
-      <input type="email" name="email" id="email" placeholder="example@domain.com">
+      <input type="email" name="email" id="email" placeholder="example@domain.com" required>
       <br><br>
 
       <label for="first_name">First name</label>
-      <input type="text" name="first_name" id="first_name" placeholder="First name">
+      <input type="text" name="first_name" id="first_name" placeholder="First name" required>
       <br>
       <label for="last_name">Last name</label>
-      <input type="text" name="last_name" id="last_name" placeholder="Last name">
+      <input type="text" name="last_name" id="last_name" placeholder="Last name" required>
       <br><br>
 
       <label for="password">Password</label>
-      <input type="password" name="password" id="password">
+      <input type="password" name="password" id="password" required>
       <br>
       <label for="password_confirm">Confirm Password</label>
-      <input type="password" name="password_confirm" id="password_confirm">
+      <input type="password" name="password_confirm" id="password_confirm" required>
       <br><br>
 
       <input type="submit" value="Register" onclick="return validate()">
@@ -35,11 +35,6 @@
     function validate() {
       var password = document.getElementById("password").value;
       var passwordConfirm = document.getElementById("password_confirm").value;
-
-      if (!password || !passwordConfirm) {
-        alert("The password fields must not be empty");
-        return false;
-      }
 
       if (password !== passwordConfirm) {
         alert("The passwords you entered do not match");

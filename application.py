@@ -81,6 +81,10 @@ def new_item():
                     category_id=request.form['category_id'],
                     user=current_user)
 
+        if not item.is_valid():
+            flash('Item fields are invalid, please fill all required fields')
+            return redirect(url_for('new_item'))
+
         repository.create_item(item)
         flash('\'%s\' successfully added' % item.title)
 
@@ -113,6 +117,10 @@ def edit_item(item_title):
         item.title = request.form['title']
         item.description = request.form['description']
         item.category_id = request.form['category_id']
+
+        if not item.is_valid():
+            flash('Item fields are invalid, please fill all required fields')
+            return redirect(url_for('edit_item', item_title=item_title))
 
         repository.session.commit()
         flash('\'%s\' successfully edited' % item_title)
@@ -172,16 +180,23 @@ def load_user(user_id):
 def register():
     if request.method == 'POST':
         data = request.form
+
+        # Check that user with that email not exists
+        if repository.get_user_by_email(data['email']):
+            flash('User with this email already exists')
+            return redirect(url_for('register'))
+
+        # Create new user
         user = repository.create_user(data['email'], data['first_name'],
                                       data['last_name'], data['password'])
+        # Validate user data
+        if not user:
+            flash('User fields are invalid, please fill all required fields')
+            return redirect(url_for('register'))
 
-        if user:
-            login_user(user)
-            flash('You have successfully registered')
-            return redirect(url_for('show_catalog'))
-
-        flash('User with this email already exists')
-        return redirect(url_for('register'))
+        login_user(user)
+        flash('You have successfully registered')
+        return redirect(url_for('show_catalog'))
 
     # GET
     return render_template('register.html')
@@ -308,6 +323,9 @@ def gconnect():
         user = repository.create_user(user_info['email'],
                                       user_info['given_name'],
                                       user_info['family_name'], None)
+        if not user:
+            return make_json_response(
+                "Cannot fetch required data to create new user.", 401)
 
     # Login the user
     login_user(user)
